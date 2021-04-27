@@ -111,7 +111,7 @@ def split_processing(num_thread, targets, algorithms_cpu, algorithms_gpu, edge_t
         threads[-1].start() # start the thread we just created
     threads.append(                                                         
         multiprocessing.Process(target=process_gpu, args=(len(targets), targets, algorithms_gpu, edge_type, splits, path)))
-    print('Starting thread: {0}'.format(i))                
+    print('Starting thread: {0}'.format(6))                
 
     # wait for all threads to finish                                            
     for t in threads:
@@ -120,7 +120,7 @@ def split_processing(num_thread, targets, algorithms_cpu, algorithms_gpu, edge_t
 num_thread = 5
 targets = [377904, 375777,  380274, 377199, 389118, 389293, 388224, 397968, 394909, 394491, 372939, 402610, 380994]
 algorithms_cpu = ['regularization', 'deep_walk', 'node2vec']
-algorithms_gpu = ['gcn', 'line', 'struct2vec']
+algorithms_gpu = ['line', 'struct2vec', 'gcn']
 edge_type = ['location', 'person', 'org']
 splits = [0.05, 0.1, 0.15, 0.2]
 path = "/home/paulocarmo/graph_experiments/"
