@@ -146,8 +146,9 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=None, type_feature=
             to_cut[row['type']] = edges[edges['type'] == row['type']].reset_index(drop=True).loc[0:row['to_cut_count']-1]
     else:
         to_cut = {}
-        for et in edge_type:
-            to_cut[et] = edges[edges['type'] == et].reset_index(drop=True).loc[0:edges_group['to_cut_count'][edges_group['type'] == et].iloc[0]-1]
+        for index, row in edges_group.iterrows():
+            if row['type'] in edge_type:
+                to_cut[row['type']] = edges[edges['type'] == row['type']].reset_index(drop=True).loc[0:row['to_cut_count']-1]
 
     # eliminar arestas, salvar grafo e arestas retiradas para avaliação
     G_disturbed = deepcopy(G)
