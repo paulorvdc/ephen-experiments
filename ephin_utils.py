@@ -401,12 +401,5 @@ def gcn(G, target, i, split, label_feature='node_type', label_number='type_code'
     df = pd.DataFrame(X_embedded)
     df['label'] = Y
     df = df.dropna()
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    
-    g = sns.scatterplot(x=0, y=1, data=df, hue="label", legend=False)
-    g.set(xlabel=None)
-    g.set(ylabel=None)
-    
-    #plt.savefig('gcn.pdf')
+
     return G
