@@ -1,7 +1,3 @@
-from ge import DeepWalk
-from ge import Node2Vec
-from ge import Struc2Vec
-from ge import LINE
 import pandas as pd
 import networkx as nx
 import numpy as np
@@ -12,6 +8,11 @@ from tqdm import tqdm
 from sklearn.neighbors import NearestNeighbors
 import random
 import pickle5 as pickle
+
+from ge import DeepWalk
+from ge import Node2Vec
+from ge import Struc2Vec
+from ge import LINE
 
 from ephin_utils import disturbed_hin
 from ephin_utils import regularization
