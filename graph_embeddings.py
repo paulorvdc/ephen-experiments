@@ -68,7 +68,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
     
     elif algorithm == 'gcn':
         G_disturbed = gcn(G_disturbed, target, i, split)
-        G_restored, restored_df = restore_hin(G_disturbed, cutted_dict)
+        G_restored, restored = restore_hin(G_disturbed, cutted_dict)
         restored.to_csv('{0}restored_new/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
 
 targets = [377904, 375777,  380274, 389293, 388224, 397968, 394909, 394491, 372939, 402610, 380994, 377199, 389118]
