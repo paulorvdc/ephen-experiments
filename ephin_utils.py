@@ -258,7 +258,7 @@ def masked_accuracy(preds, labels, mask):
 import layers.graph as lg
 import utils.sparse as us
 
-def gcn(G, label_feature='node_type', label_number='type_code', embedding_feature='f'):
+def gcn(G, target, i, split, label_feature='node_type', label_number='type_code', embedding_feature='f'):
     node_list = []
     for node in G.nodes():
       node_list.append(node)
@@ -318,7 +318,7 @@ def gcn(G, label_feature='node_type', label_number='type_code', embedding_featur
   
     l_sizes = [1024, 1024, 512, nb_classes]
     
-    name_text = str(i) + '_' + str(split)
+    name_text = str(target) + '_' + str(i) + '_' + str(split)
     
     o_fc1 = lg.GraphConvLayer(
         input_dim=feat_x.shape[-1],
