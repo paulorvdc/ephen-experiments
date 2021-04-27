@@ -140,7 +140,6 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=None, type_feature=
     edges = edges.sample(frac=1, random_state=random_state).reset_index(drop=True)
     edges_group = edges_group.rename(columns={'node': 'count', 'neighbor': 'to_cut_count'})
     edges_group['to_cut_count'] = edges_group['to_cut_count'].apply(lambda x:round(x * split))
-    print(edges_group)
     if edge_type is None:
         to_cut = {}
         for index, row in edges_group.iterrows():
