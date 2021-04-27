@@ -1,3 +1,6 @@
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+
 def matmul(x, y, sparse=False):
     """Wrapper for sparse matrix multiplication."""
     if sparse:
