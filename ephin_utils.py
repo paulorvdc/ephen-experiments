@@ -255,6 +255,9 @@ def masked_accuracy(preds, labels, mask):
     accuracy_all *= mask
     return tf.reduce_mean(accuracy_all)
 
+import layers.graph as lg
+import utils.sparse as us
+
 def gcn(G, label_feature='node_type', label_number='type_code', embedding_feature='f'):
     node_list = []
     for node in G.nodes():
