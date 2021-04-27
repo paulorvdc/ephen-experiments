@@ -22,4 +22,4 @@ https://drive.google.com/drive/folders/1BApN5s8hxhm1wOs-4FrEykZzFpkP7zW_?usp=sha
 
 
 ## wip
-new experiments, methods and data will be updated with the research progress.
+new experiments, methods, data and usability will be improved and updated with the research progress.
