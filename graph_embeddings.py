@@ -13,14 +13,14 @@ from sklearn.neighbors import NearestNeighbors
 import random
 import pickle5 as pickle
 
-from utils import disturbed_hin
-from utils import regularization
-from utils import get_knn_data
-from utils import restore_hin
-from utils import embedding_graph
-from utils import masked_softmax_cross_entropy
-from utils import masked_accuracy
-from utils import gcn
+from ephin_utils import disturbed_hin
+from ephin_utils import regularization
+from ephin_utils import get_knn_data
+from ephin_utils import restore_hin
+from ephin_utils import embedding_graph
+from ephin_utils import masked_softmax_cross_entropy
+from ephin_utils import masked_accuracy
+from ephin_utils import gcn
 
 def run_model_cpu(G_disturbed, cutted_dict, algorithm, target, path, iteration, split):
     if algorithm == 'regularization':

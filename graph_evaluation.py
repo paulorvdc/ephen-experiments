@@ -4,8 +4,8 @@ import glob
 import os
 from ast import literal_eval
 
-from utils import is_equal
-from utils import get_metric
+from ephin_utils import is_equal
+from ephin_utils import get_metric
 
 path = '/media/pauloricardo/basement/projeto/restored_new/'
 all_files = glob.glob(os.path.join(path, "*.csv"))
