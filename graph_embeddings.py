@@ -8,6 +8,11 @@ from tqdm import tqdm
 from sklearn.neighbors import NearestNeighbors
 import random
 import pickle5 as pickle
+import time
+import scipy.sparse
+import matplotlib.pyplot as plt
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 from ge import DeepWalk
 from ge import Node2Vec
