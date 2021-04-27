@@ -134,7 +134,7 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=None, type_feature=
     edges = edges.rename(columns={0: 'node', 1: 'neighbor'})
     edges['type'] = edge_types
     
-    edges_group = edges.groupby(by=['type']).count().reset_index()
+    edges_group = edges.groupby(by=['type'], as_index=False).count().reset_index()
 
     # preparar arestas para eliminar
     edges = edges.sample(frac=1, random_state=random_state).reset_index(drop=True)
