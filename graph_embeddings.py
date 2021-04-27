@@ -112,8 +112,7 @@ def split_processing(num_thread, targets, algorithms_cpu, algorithms_gpu, edge_t
         t.join()
 
 num_thread = 5
-#targets = [377904, 375777,  380274, 377199, 389118, 389293, 388224, 397968, 394909, 394491, 372939, 402610, 380994]
-targets = [394909, 389118, 389293, 388224, 397968, 394491, 372939, 402610, 380994, 377199]
+targets = [377904, 375777,  380274, 377199, 389118, 389293, 388224, 397968, 394909, 394491, 372939, 402610, 380994]
 algorithms_cpu = ['regularization', 'deep_walk', 'node2vec']
 algorithms_gpu = ['gcn', 'line', 'struct2vec']
 edge_type = ['location', 'person', 'org']
