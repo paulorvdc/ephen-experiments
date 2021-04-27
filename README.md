@@ -3,12 +3,12 @@ Event prediction experiments with ephin and other information network embedding 
 
 GraphEmbeddings submodule based on https://github.com/shenweichen/GraphEmbedding but works tf 2.x
 
-# install
+## install
 Inside GraphEmbeddings directory run
 ```
 python setup.py install
 ```
 
 
-# WIP
+## WIP
 release graphs for future experiments
