@@ -78,7 +78,7 @@ splits = [0.05, 0.1, 0.15, 0.2]
 path = "/home/paulocarmo/graph_experiments/"
 
 for target in targets:
-    with open(path + "graphs/graph_" + str(targets[i]) + ".gpickle", "rb") as fh:
+    with open(path + "graphs/graph_" + str(target) + ".gpickle", "rb") as fh:
         G = pickle.load(fh)
     for i in range(10):
         for split in splits:
