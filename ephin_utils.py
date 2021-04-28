@@ -116,7 +116,7 @@ def get_metric(metric, pred):
     elif metric == 'f1':
         return f1_score([1] * pred.shape[0], list(pred))
 
-def disturbed_hin(G, split=0.1, random_state=None, edge_type=None, type_feature='edge_type'):
+def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'event_event', 'event_location', 'event_person', 'event_org', 'event_theme'], type_feature='edge_type'):
     """
     G: hin;
     split: percentage to be cut from the hin;
@@ -140,15 +140,10 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=None, type_feature=
     edges = edges.sample(frac=1, random_state=random_state).reset_index(drop=True)
     edges_group = edges_group.rename(columns={'node': 'count', 'neighbor': 'to_cut_count'})
     edges_group['to_cut_count'] = edges_group['to_cut_count'].apply(lambda x:round(x * split))
-    if edge_type is None:
-        to_cut = {}
-        for index, row in edges_group.iterrows():
+    to_cut = {}
+    for index, row in edges_group.iterrows():
+        if row['type'] in edge_type:
             to_cut[row['type']] = edges[edges['type'] == row['type']].reset_index(drop=True).loc[0:row['to_cut_count']-1]
-    else:
-        to_cut = {}
-        for index, row in edges_group.iterrows():
-            if row['type'] in edge_type:
-                to_cut[row['type']] = edges[edges['type'] == row['type']].reset_index(drop=True).loc[0:row['to_cut_count']-1]
 
     # eliminar arestas, salvar grafo e arestas retiradas para avaliação
     G_disturbed = deepcopy(G)
@@ -385,21 +380,5 @@ def gcn(G, target, i, split, label_feature='node_type', label_number='type_code'
                 embedding_out = embeddings
     for idx, node in enumerate(G.nodes()):
         G.nodes[node][embedding_feature] = embedding_out[idx]
-    # plot    
-    X = []
-    Y = []
-    for idx, node in enumerate(G.nodes()):
-        X.append(embedding_out[idx])
-        Y.append(G.nodes[node]['node_type'])
-        
-    X = np.array(X)
-    
-    from sklearn.manifold import TSNE
-    X_embedded = TSNE(n_components=2).fit_transform(X)
-    X_embedded.shape
-    
-    df = pd.DataFrame(X_embedded)
-    df['label'] = Y
-    df = df.dropna()
 
     return G
