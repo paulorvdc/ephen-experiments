@@ -8,6 +8,8 @@ from scipy.spatial.distance import cosine
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
+from ephin_utils import decode_html_text
+
 df = pd.read_csv('/media/pauloricardo/basement/projeto/df11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)
 data = pd.read_csv('/media/pauloricardo/basement/projeto/data11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)
 targets = [377904, 375777,  380274, 389293, 388224, 397968, 394909, 394491, 372939, 402610, 380994, 377199, 389118]
@@ -36,7 +38,7 @@ for target in targets:
     plt.figure(target)
     g = sns.lineplot(x="date", y="cos",
              data=precursor)
-    g.set_title("\n".join(wrap('event: ' + BeautifulSoup(df['text'].iloc[target], 'html.parser').get_text(), 80)), fontsize=18)
+    g.set_title("\n".join(wrap('event: ' + decode_html_text(df['text'].iloc[target]))), fontsize=18)
     g.set_xlabel('week-year', fontsize=14)
     g.set_ylabel('cosine', fontsize=14)
     for item in g.get_xticklabels():

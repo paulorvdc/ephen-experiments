@@ -382,3 +382,8 @@ def gcn(G, target, i, split, label_feature='node_type', label_number='type_code'
         G.nodes[node][embedding_feature] = embedding_out[idx]
 
     return G
+
+from bs4 import BeautifulSoup
+def decode_html_text(x):
+    x = BeautifulSoup(x, 'html.parser')
+    return x.get_text()
