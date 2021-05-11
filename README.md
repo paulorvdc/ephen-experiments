@@ -4,7 +4,7 @@ event prediction experiments with ephin and other information network embedding 
 ## GraphEmbeddings
 GraphEmbeddings submodule based on https://github.com/shenweichen/GraphEmbedding but the used algorithms works with tf 2.x
 ### install
-inside GraphEmbeddings directory run
+inside GraphEmbeddings directory from this repository run
 ```
 python setup.py install
 ```
