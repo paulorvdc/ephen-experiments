@@ -35,7 +35,7 @@ for target in targets:
     precursor.to_csv(path + "/precursors/" + str(target) + ".csv")
     print(precursor)
     
-    target_date = pd.to_datetime(df['text'].iloc[target], format='%Y-%m-%d')
+    target_date = pd.to_datetime(df['DATE'].iloc[target], format='%Y-%m-%d')
     plt.figure(target)
     g = sns.lineplot(x="date", y="cos",
              data=precursor)
