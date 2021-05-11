@@ -50,7 +50,7 @@ for algorithm in algorithms:
 results_df = pd.DataFrame(results_df)
 results_df = results_df.groupby(by=['metric', 'algorithm', 'target', 'split', 'type'], as_index=False).mean()
 from datetime import date
-results_df.to_csv('/media/pauloricardo/basement/projeto/restored_results/results_{}.csv'.format(data.today()))
+results_df.to_csv('/media/pauloricardo/basement/projeto/restored_results/results_{}.csv'.format(date.today()))
 
 """
 import seaborn as sns
