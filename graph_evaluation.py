@@ -49,7 +49,10 @@ for algorithm in algorithms:
                         
 results_df = pd.DataFrame(results_df)
 results_df = results_df.groupby(by=['metric', 'algorithm', 'target', 'split', 'type'], as_index=False).mean()
+from datetime import date
+results_df.to_csv('/media/pauloricardo/basement/projeto/restored_results/results_{}.csv'.format(data.today()))
 
+"""
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -68,4 +71,4 @@ for idxt, target in enumerate(targets):
             if type_filtered.shape[0] >= 1:
                 plt.figure(idxt + idxs + idxe)
                 ax = sns.barplot(x="algorithm", y="value", hue="metric", data=type_filtered).set_title(str(target) + '_' + str(split) + '_' + edge_type)
-                plt.show()
+                plt.show()"""
