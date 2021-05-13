@@ -35,11 +35,11 @@ for target in targets:
     precursor.to_csv(path + "/precursors/" + str(target) + ".csv")
     print(precursor)
     
-    target_date = pd.to_datetime(df['text'].iloc[target], format='%Y-%m-%d')
+    target_date = pd.to_datetime(df['DATE'].iloc[target], format='%Y-%m-%d')
     plt.figure(target)
     g = sns.lineplot(x="date", y="cos",
              data=precursor)
-    g.set_title("\n".join(wrap('event: ' + decode_html_text(df['text'].iloc[target]) + ' happened at week ' + str(target_date.week) + ' of the year ' + str(target_date.year))), fontsize=18)
+    g.set_title("\n".join(wrap('event: ' + decode_html_text(df['text'].iloc[target]) + '. happened at week ' + str(target_date.week) + ' of the year ' + str(target_date.year))), fontsize=18)
     g.set_xlabel('week-year', fontsize=14)
     g.set_ylabel('cosine', fontsize=14)
     for item in g.get_xticklabels():

@@ -13,7 +13,7 @@ all_files = glob.glob(os.path.join(path, "*.csv"))
 targets = [377904, 375777,  380274, 377199, 389118, 389293, 388224, 397968, 394909, 394491, 372939, 402610, 380994]
 algorithms = ['regularization', 'deep_walk', 'node2vec', 'line', 'struct2vec', 'gcn']
 splits = [0.05, 0.1, 0.15, 0.2]
-metrics = ['recall']
+metrics = ['acc']
 edge_types = ['event_location', 'event_actor']
 
 results_df = {'metric': [], 'algorithm': [], 'target': [], 'split': [], 'type': [], 'value': []}
@@ -50,7 +50,7 @@ for algorithm in algorithms:
 results_df = pd.DataFrame(results_df)
 results_df = results_df.groupby(by=['metric', 'algorithm', 'target', 'split', 'type'], as_index=False).mean()
 from datetime import date
-results_df.to_csv('/media/pauloricardo/basement/projeto/restored_results/results_{}.csv'.format(data.today()))
+results_df.to_csv('/media/pauloricardo/basement/projeto/restored_results/results_{}.csv'.format(date.today()))
 
 """
 import seaborn as sns

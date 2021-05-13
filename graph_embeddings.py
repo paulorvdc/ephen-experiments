@@ -75,7 +75,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         restored.to_csv('{0}restored_new/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
 
 targets = [377904, 375777,  380274, 389293, 388224, 397968, 394909, 394491, 372939, 402610, 380994, 377199, 389118]
-algorithms = ['regularization', 'deep_walk', 'node2vec', 'line', 'struc2vec', 'gcn']
+algorithms = ['regularization', 'deep_walk', 'node2vec', 'gcn', 'line', 'struc2vec']
 edge_type = ['event_location', 'event_person', 'event_org', 'event_event']
 splits = [0.05, 0.1, 0.15, 0.2]
 path = "/home/paulocarmo/graph_experiments/"
