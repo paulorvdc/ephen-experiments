@@ -35,7 +35,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
     if algorithm == 'regularization':
         G_disturbed = regularization(G_disturbed)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)
-        restored.to_csv('{0}restored_new/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{0}restored/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
     
     elif algorithm == 'deep_walk':
         model_deep_walk = DeepWalk(G_disturbed,walk_length=10,num_walks=80,workers=1)
@@ -43,7 +43,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         embeddings_deep_walk = model_deep_walk.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_deep_walk)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)    
-        restored.to_csv('{0}restored_new/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{0}restored/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
     
     elif algorithm == 'node2vec':
         model_node2vec = Node2Vec(G_disturbed, walk_length = 10, num_walks = 80, p = 0.5, q = 1, workers = 1)
@@ -51,7 +51,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         embeddings_node2vec = model_node2vec.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_node2vec)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)
-        restored.to_csv('{0}restored_new/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{0}restored/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
     
     elif algorithm == 'struc2vec':
         model_struc2vec = Struc2Vec(G_disturbed, 10, 80, workers=2, verbose=40) #init model
@@ -59,7 +59,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         embeddings_struc2vec = model_struc2vec.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_struc2vec)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)    
-        restored.to_csv('{0}restored_new/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))    
+        restored.to_csv('{0}restored/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))    
     
     elif algorithm == 'line':
         model_line = LINE(G_disturbed,embedding_size=512, order='second') #init model,order can be ['first','second','all']
@@ -67,12 +67,12 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         embeddings_line = model_line.get_embeddings()# get embedding vectors 
         G_disturbed = embedding_graph(G_disturbed, embeddings_line)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)    
-        restored.to_csv('{0}restored_new/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{0}restored/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
     
     elif algorithm == 'gcn':
         G_disturbed = gcn(G_disturbed, target, i, split)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)
-        restored.to_csv('{0}restored_new/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{0}restored/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
 
 targets = [377904, 375777,  380274, 389293, 388224, 397968, 394909, 394491, 372939, 402610, 380994, 377199, 389118]
 algorithms = ['regularization', 'deep_walk', 'node2vec', 'gcn', 'line', 'struc2vec']
