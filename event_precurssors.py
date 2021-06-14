@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from textwrap import wrap
 import pickle5 as pickle
 from scipy.spatial.distance import cosine
-from bs4 import BeautifulSoup
 from tqdm import tqdm
 
 from ephin_utils import decode_html_text

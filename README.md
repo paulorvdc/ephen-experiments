@@ -19,4 +19,5 @@ https://drive.google.com/drive/folders/11OhFR3ycVxMAVIfQaiqmIY7ZI3hJFk4D?usp=sha
 ### networks like these are required to the experiments, so download them (or create yours) to an accessible directory on your machine and update the path on the code. 
 
 ## wip
-new experiments, methods, data and usability will be improved and updated with the research progress.
+for now: data readings with .parquet and single dataframe for BERT and other atributes for the news.
+as well as other improvements like new experiments, methods, data and usability features with the research progress.
