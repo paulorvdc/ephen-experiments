@@ -139,10 +139,7 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'eve
     edges = pd.DataFrame(edges)
     edges = edges.rename(columns={0: 'node', 1: 'neighbor'})
     edges['type'] = edge_types
-    print(edges)
-    edges = edges.apply(keep_left, G=G, axis=1)
-    print(edges)
-    
+    edges = edges.apply(keep_left, G=G, axis=1)    
     edges_group = edges.groupby(by=['type'], as_index=False).count().reset_index()
 
     # preparar arestas para eliminar
