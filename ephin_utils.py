@@ -124,12 +124,6 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'eve
     edge_type: listlike object of types of edges to be cut;
     type_feature: feature name of edge_type on your hin.
     """
-    def keep_left(x, G):
-        edge_split = x['type'].split('_')
-        if G.nodes[x['node']]['node_type'] != edge_split[0]:
-            x['node'], x['neighbor'] = x['neighbor'], x['node']
-        return x
-    
     # prepare data for type counting
     edges = list(G.edges)
     edge_types = []
@@ -139,7 +133,6 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'eve
     edges = pd.DataFrame(edges)
     edges = edges.rename(columns={0: 'node', 1: 'neighbor'})
     edges['type'] = edge_types
-    edges = edges.apply(keep_left, G=G, axis=1)    
     edges_group = edges.groupby(by=['type'], as_index=False).count().reset_index()
 
     # preparar arestas para eliminar
