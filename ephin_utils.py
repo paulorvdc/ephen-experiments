@@ -124,6 +124,12 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'eve
     edge_type: listlike object of types of edges to be cut;
     type_feature: feature name of edge_type on your hin.
     """
+    def keep_left(x, G):
+        edge_split = x['type'].split('_')
+        if G.nodes[x['node']]['node_type'] != edge_split[0]:
+            x['node'], x['neighbor'] = x['neighbor'], x['node']
+        return x
+    
     # prepare data for type counting
     edges = list(G.edges)
     edge_types = []
@@ -133,6 +139,9 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'eve
     edges = pd.DataFrame(edges)
     edges = edges.rename(columns={0: 'node', 1: 'neighbor'})
     edges['type'] = edge_types
+    print(edges)
+    edges = edges.apply(keep_left, G=G, axis=1)
+    print(edges)
     
     edges_group = edges.groupby(by=['type'], as_index=False).count().reset_index()
 
@@ -144,7 +153,7 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'eve
     for index, row in edges_group.iterrows():
         if row['type'] in edge_type:
             to_cut[row['type']] = edges[edges['type'] == row['type']].reset_index(drop=True).loc[0:row['to_cut_count']-1]
-
+                    
     # eliminar arestas, salvar grafo e arestas retiradas para avaliação
     G_disturbed = deepcopy(G)
     for key, tc_df in to_cut.items():
