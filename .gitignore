@@ -132,3 +132,5 @@ dmypy.json
 graphs/
 temp_struc2vec/
 .vscode
+
+GraphEmbeddings/README.md
