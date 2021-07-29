@@ -124,6 +124,11 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'eve
     edge_type: listlike object of types of edges to be cut;
     type_feature: feature name of edge_type on your hin.
     """
+    def keep_left(x, G):
+        edge_split = x['type'].split('_')
+        if G.nodes[x['node']]['node_type'] != edge_split[0]:
+            x['node'], x['neighbor'] = x['neighbor'], x['node']
+        return x
     # prepare data for type counting
     edges = list(G.edges)
     edge_types = []
@@ -133,6 +138,7 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'eve
     edges = pd.DataFrame(edges)
     edges = edges.rename(columns={0: 'node', 1: 'neighbor'})
     edges['type'] = edge_types
+    edges = edges.apply(keep_left, G=G, axis=1)
     edges_group = edges.groupby(by=['type'], as_index=False).count().reset_index()
 
     # preparar arestas para eliminar
@@ -196,33 +202,29 @@ def get_knn_data(G, node, embedding_feature: str = 'f'):
             knn_nodes.append(node)
     return pd.DataFrame(knn_data), pd.DataFrame(knn_nodes)
 
-def restore_hin(G, cutted_dict, node_feature='node', neighbor_feature='neighbor', node_type_feature='node_type', embedding_feature='f'):
+def restore_hin(G, cutted_dict, k=5, node_feature='node', neighbor_feature='neighbor', node_type_feature='node_type', embedding_feature='f'):
     G_restored = deepcopy(G)
     
     restored_dict = {'true': [], 'restored': [], 'edge_type': []}
     for key, value in cutted_dict.items():
         for index, row in tqdm(value.iterrows(), total=value.shape[0]):
             edge_to_add = key.split('_')
-            if edge_to_add[0] == G_restored.nodes[row[node_feature]][node_type_feature]:
-                edge_to_add[0] = row[node_feature]
-            else:
-                edge_to_add[1] = row[node_feature]
+            edge_to_add[0] = row[node_feature]
             edge_to_add = [row[node_feature] if e == G_restored.nodes[row[node_feature]][node_type_feature] and row[node_feature] != edge_to_add[0] else e for e in edge_to_add]
             knn_data, knn_nodes = get_knn_data(G_restored, row[node_feature])
             knn_nodes['type'] = knn_nodes[0].apply(lambda x: G_restored.nodes[x][node_type_feature])
             knn_data = knn_data[knn_nodes['type'].isin(edge_to_add)]
             knn_nodes = knn_nodes[knn_nodes['type'].isin(edge_to_add)]
-            knn = NearestNeighbors(n_neighbors=1, metric='cosine')
+            knn = NearestNeighbors(n_neighbors=k, metric='cosine')
             knn.fit(knn_data)
             indice = knn.kneighbors(G_restored.nodes[row[node_feature]][embedding_feature].reshape(-1, 512), return_distance=False)
-            if edge_to_add[0] != row[node_feature]:
-                edge_to_add[0] = knn_nodes[0].iloc[indice[0][0]]
-            else:
-                edge_to_add[1] = knn_nodes[0].iloc[indice[0][0]]
+            edge_to_add[1] = [knn_nodes[0].iloc[indice[0][i]] for i in range(k)]
             restored_dict['true'].append([row[node_feature], row[neighbor_feature]])
             restored_dict['restored'].append(edge_to_add)
             restored_dict['edge_type'].append(key)
-            G_restored.add_edge(edge_to_add[0],edge_to_add[1],edge_type=key)
+            
+    for idx, restored in enumerate(restored_dict['restored']):
+        G_restored.add_edge(restored[0],restored[1][0], edge_type=restored_dict['edge_type'][idx])
     return G_restored, pd.DataFrame(restored_dict)
 
 # put embeddings on graph
@@ -386,3 +388,50 @@ from bs4 import BeautifulSoup
 def decode_html_text(x):
     x = BeautifulSoup(x, 'html.parser')
     return x.get_text()
+
+from gensim.models import Word2Vec
+from stellargraph.data import UniformRandomMetaPathWalk
+from stellargraph import StellarGraph
+
+def metapath2vec(graph, dimensions = 512, num_walks = 1, walk_length = 100, context_window_size = 10, 
+                           num_iter = 1, workers = 1, node_type='node_type', edge_type='edge_type',
+                           user_metapaths=[
+                                   ['event','date','event'],['event','what','event'],['event','where','event'],
+                                   ['event','who','event'],['event','why','event'],['event','how','event'],
+                                   ['event','date','event','trend','event'],['event','what','event','trend','event'],
+                                   ['event','where','event','trend','event'],['event','who','event','trend','event'],
+                                   ['event','why','event','trend','event'],['event','how','event','trend','event'],
+                               ]
+                           ):
+    s_graph = StellarGraph.from_networkx(graph, node_type_attr=node_type, edge_type_attr=edge_type)
+    rw = UniformRandomMetaPathWalk(s_graph)
+    walks = rw.run(
+        s_graph.nodes(), n=num_walks, length=walk_length, metapaths=user_metapaths
+    )
+    
+    print(f"Number of random walks: {len(walks)}")
+
+    model = Word2Vec(
+        walks,
+        size=dimensions,
+        window=context_window_size,
+        min_count=0,
+        sg=1,
+        workers=workers,
+        iter=num_iter,
+    )
+    
+    def get_embeddings(model, graph):
+        if model is None:
+            print("model not train")
+            return {}
+
+        _embeddings = {}
+        for word in graph.nodes():
+            try:
+                _embeddings[word] = model.wv[word]
+            except:
+                _embeddings[word] = np.zeros(dimensions)
+
+        return _embeddings
+    return get_embeddings(model, graph)
