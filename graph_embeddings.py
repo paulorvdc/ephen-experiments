@@ -32,11 +32,11 @@ from ephin_utils import masked_accuracy
 from ephin_utils import metapath2vec
 from ephin_utils import gcn
 
-def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, split):
+def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, split, restored_folder_name):
     if algorithm == 'regularization':
         G_disturbed = regularization(G_disturbed)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)
-        restored.to_csv('{0}restored_28.07/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
     
     elif algorithm == 'deep_walk':
         model_deep_walk = DeepWalk(G_disturbed,walk_length=10,num_walks=80,workers=1)
@@ -44,7 +44,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         embeddings_deep_walk = model_deep_walk.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_deep_walk)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)    
-        restored.to_csv('{0}restored_28.07/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
     
     elif algorithm == 'node2vec':
         model_node2vec = Node2Vec(G_disturbed, walk_length = 10, num_walks = 80, p = 0.5, q = 1, workers = 1)
@@ -52,7 +52,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         embeddings_node2vec = model_node2vec.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_node2vec)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)
-        restored.to_csv('{0}restored_28.07/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
     
     elif algorithm == 'struc2vec':
         model_struc2vec = Struc2Vec(G_disturbed, 10, 80, workers=2, verbose=40) #init model
@@ -60,13 +60,13 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         embeddings_struc2vec = model_struc2vec.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_struc2vec)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)    
-        restored.to_csv('{0}restored_28.07/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))    
+        restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
 
     elif algorithm == 'metapath2vec':
         embeddings_metapath2vec = metapath2vec(G_disturbed)
         G_disturbed = embedding_graph(G_disturbed, embeddings_metapath2vec)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)
-        restored.to_csv('{0}restored_28.07/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
     
     elif algorithm == 'line':
         model_line = LINE(G_disturbed,embedding_size=512, order='second') #init model,order can be ['first','second','all']
@@ -74,27 +74,48 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         embeddings_line = model_line.get_embeddings()# get embedding vectors 
         G_disturbed = embedding_graph(G_disturbed, embeddings_line)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)    
-        restored.to_csv('{0}restored_28.07/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
     
     elif algorithm == 'gcn':
         G_disturbed = gcn(G_disturbed, target, i, split)
         G_restored, restored = restore_hin(G_disturbed, cutted_dict)
-        restored.to_csv('{0}restored_28.07/{1}_{2}_{3}_{4}.csv'.format(path, algorithm, str(target), iteration, split))
+        restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
 
 #targets = [377904, 375777, 380274, 389293, 388224, 397968, 394909, 394491, 402610, 372939, 380994, 377199, 389118]
-targets = [389293, 388224, 397968, 394909, 394491, 402610]
-algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2vec', 'line', 'gcn']
 #edge_type = ['event_location', 'event_person', 'event_org', 'event_event']
-edge_type = ['event_location']
-splits = [0.05, 0.1, 0.15, 0.2]
+
+import sys
+
+targets = algorithms = edge_type = splits = interval = None 
 path = "/media/pauloricardo/basement/projeto/"
+
+if sys.argv[1] == 'location':
+    targets = [377904, 375777, 380274, 389293, 388224, 397968, 394909, 394491, 402610, 372939, 380994, 377199, 389118]
+    algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2vec', 'line', 'gcn']
+    edge_type = ['event_location']
+    splits = [0.05, 0.1, 0.15, 0.2]
+    interval = 0
+
+elif sys.argv[1] == 'actor':
+    targets = [402610]
+    algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2vec', 'line', 'gcn']
+    edge_type = ['event_person', 'event_org']
+    splits = [0.05, 0.1, 0.15, 0.2]
+    interval = 7
+
+else:
+    targets = [377904, 375777, 380274, 389293, 388224, 397968, 394909, 394491, 402610, 372939, 380994, 377199, 389118]
+    algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2vec', 'line', 'gcn']
+    edge_type = ['event_event']
+    splits = [0.05, 0.1, 0.15, 0.2]
+    interval = 0
 
 for target in targets:
     with open(path + "graphs/graph_" + str(target) + ".gpickle", "rb") as fh:
         G = pickle.load(fh)
-    for i in range(10):
+    for i in range(interval, 10):
         for split in splits:
             G_disturbed, cutted_dict = disturbed_hin(G, split=split, random_state=(1 + i), edge_type=edge_type)
             for algorithm in algorithms:
-                print('TEST: {0}, {1}, {2}, {3}'.format(algorithm, target, i, split))
-                run_model(G_disturbed, cutted_dict, algorithm, target, path, i, split)
+                print('TEST: {}, {}, {}, {}, {}'.format(algorithm, target, i, split, sys.argv[1]))
+                run_model(G_disturbed, cutted_dict, algorithm, target, path, i, split, sys.argv[1])
