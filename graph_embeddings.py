@@ -24,7 +24,7 @@ from ge import LINE
 
 from ephen_utils import disturbed_hin
 from ephen_utils import regularization
-from ephen_utils import restore_hin_parallel
+from ephen_utils import restore_hin
 from ephen_utils import embedding_graph
 from ephen_utils import metapath2vec
 from ephen_utils import gcn
@@ -32,7 +32,7 @@ from ephen_utils import gcn
 def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, split, restored_folder_name):
     if algorithm == 'regularization':
         G_disturbed = regularization(G_disturbed)
-        G_restored, restored = restore_hin_parallel(G_disturbed, cutted_dict)
+        restored = restore_hin(G_disturbed, cutted_dict)
         restored.to_csv('{}restored_teste_annoy_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
     
     elif algorithm == 'deep_walk':
@@ -40,7 +40,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         model_deep_walk.train(window_size=5,iter=3,embed_size=512)# train model
         embeddings_deep_walk = model_deep_walk.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_deep_walk)
-        G_restored, restored = restore_hin_parallel(G_disturbed, cutted_dict)    
+        restored = restore_hin(G_disturbed, cutted_dict)    
         restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
     
     elif algorithm == 'node2vec':
@@ -48,7 +48,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         model_node2vec.train(window_size=5,iter=3,embed_size=512)# train model
         embeddings_node2vec = model_node2vec.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_node2vec)
-        G_restored, restored = restore_hin_parallel(G_disturbed, cutted_dict)
+        restored = restore_hin(G_disturbed, cutted_dict)
         restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
     
     elif algorithm == 'struc2vec':
@@ -56,13 +56,13 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         model_struc2vec.train(window_size = 5, iter = 3, embed_size=512)# train model
         embeddings_struc2vec = model_struc2vec.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_struc2vec)
-        G_restored, restored = restore_hin_parallel(G_disturbed, cutted_dict)    
+        restored = restore_hin(G_disturbed, cutted_dict)    
         restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
 
     elif algorithm == 'metapath2vec':
         embeddings_metapath2vec = metapath2vec(G_disturbed)
         G_disturbed = embedding_graph(G_disturbed, embeddings_metapath2vec)
-        G_restored, restored = restore_hin_parallel(G_disturbed, cutted_dict)
+        restored = restore_hin(G_disturbed, cutted_dict)
         restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
     
     elif algorithm == 'line':
@@ -70,12 +70,12 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         model_line.train(batch_size=8,epochs=20,verbose=0)# train model
         embeddings_line = model_line.get_embeddings()# get embedding vectors 
         G_disturbed = embedding_graph(G_disturbed, embeddings_line)
-        G_restored, restored = restore_hin_parallel(G_disturbed, cutted_dict)    
+        restored = restore_hin(G_disturbed, cutted_dict)    
         restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
     
     elif algorithm == 'gcn':
         G_disturbed = gcn(G_disturbed, target, i, split)
-        G_restored, restored = restore_hin_parallel(G_disturbed, cutted_dict)
+        restored = restore_hin(G_disturbed, cutted_dict)
         restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
 
 #targets = [377904, 375777, 380274, 389293, 388224, 397968, 394909, 394491, 402610, 372939, 380994, 377199, 389118]

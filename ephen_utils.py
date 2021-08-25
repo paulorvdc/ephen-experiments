@@ -202,109 +202,35 @@ def get_knn_data(G, node, embedding_feature: str = 'f'):
             knn_nodes.append(node)
     return pd.DataFrame(knn_data), pd.DataFrame(knn_nodes)
 
-def restore_hin(G, cutted_dict, k=5, node_feature='node', neighbor_feature='neighbor', node_type_feature='node_type', embedding_feature='f'):
-    G_restored = deepcopy(G)
-    
-    restored_dict = {'true': [], 'restored': [], 'edge_type': []}
-    for key, value in cutted_dict.items():
-        for index, row in tqdm(value.iterrows(), total=value.shape[0]):
-            edge_to_add = key.split('_')
-            edge_to_add[0] = row[node_feature]
-            edge_to_add = [row[node_feature] if e == G_restored.nodes[row[node_feature]][node_type_feature] and row[node_feature] != edge_to_add[0] else e for e in edge_to_add]
-            knn_data, knn_nodes = get_knn_data(G_restored, row[node_feature])
-            knn_nodes['type'] = knn_nodes[0].apply(lambda x: G_restored.nodes[x][node_type_feature])
-            knn_data = knn_data[knn_nodes['type'].isin(edge_to_add)]
-            knn_nodes = knn_nodes[knn_nodes['type'].isin(edge_to_add)]
-            knn = NearestNeighbors(n_neighbors=k, metric='cosine')
-            knn.fit(knn_data)
-            indice = knn.kneighbors(G_restored.nodes[row[node_feature]][embedding_feature].reshape(-1, 512), return_distance=False)
-            edge_to_add[1] = [knn_nodes[0].iloc[indice[0][i]] for i in range(k)]
-            restored_dict['true'].append([row[node_feature], row[neighbor_feature]])
-            restored_dict['restored'].append(edge_to_add)
-            restored_dict['edge_type'].append(key)
-            
-    for idx, restored in enumerate(restored_dict['restored']):
-        G_restored.add_edge(restored[0],restored[1][0], edge_type=restored_dict['edge_type'][idx])
-    return G_restored, pd.DataFrame(restored_dict)
-
-import multiprocessing
-def restore_hin_parallel(G, cutted_dict, n_jobs=-1, k=5, node_feature='node', neighbor_feature='neighbor', node_type_feature='node_type', embedding_feature='f'):
-    def process(start, end, key, value, return_dict, thread_id):
-        global restored_dict
-        value_thread = value.loc[start:(end-1)]
-        restored_dict_thread = {'true': [], 'restored': [], 'edge_type': []}
-        for index, row in tqdm(value_thread.iterrows(), total=value_thread.shape[0]):
-            edge_to_add = key.split('_')
-            edge_to_add[0] = row[node_feature]
-            edge_to_add = [row[node_feature] if e == G_restored.nodes[row[node_feature]][node_type_feature] and row[node_feature] != edge_to_add[0] else e for e in edge_to_add]
-            knn_data, knn_nodes = get_knn_data(G_restored, row[node_feature])
-            knn_nodes['type'] = knn_nodes[0].apply(lambda x: G_restored.nodes[x][node_type_feature])
-            knn_data = knn_data[knn_nodes['type'].isin(edge_to_add)]
-            knn_nodes = knn_nodes[knn_nodes['type'].isin(edge_to_add)]
-            knn = NearestNeighbors(n_neighbors=k, metric='cosine')
-            knn.fit(knn_data)
-            indice = knn.kneighbors(G_restored.nodes[row[node_feature]][embedding_feature].reshape(-1, 512), return_distance=False)
-            edge_to_add[1] = [knn_nodes[0].iloc[indice[0][i]] for i in range(k)]
-            restored_dict_thread['true'].append([row[node_feature], row[neighbor_feature]])
-            restored_dict_thread['restored'].append(edge_to_add)
-            restored_dict_thread['edge_type'].append(key)
-        for key in restored_dict_thread.keys():
-            _key = key + str(thread_id)
-            return_dict[_key] = (restored_dict_thread[key])
-    
-    def split_processing(n_jobs, key, value, return_dict):
-        split_size = round(len(value) / n_jobs)
-        threads = []                                                                
-        for i in range(n_jobs):                                                 
-            # determine the indices of the list this thread will handle             
-            start = i * split_size                                                  
-            # special case on the last chunk to account for uneven splits           
-            end = len(value) if i+1 == n_jobs else (i+1) * split_size                
-            # create the thread
-            threads.append(                                                         
-                multiprocessing.Process(target=process, args=(start, end, key, value, return_dict, i)))
-            threads[-1].start() # start the thread we just created                  
-
-        # wait for all threads to finish                                            
-        for t in threads:
-            t.join()
-
-    if n_jobs == -1:
-        n_jobs = multiprocessing.cpu_count()
-    G_restored = deepcopy(G)
-    restored_dict = {'true': [], 'restored': [], 'edge_type': []}
-    return_dict = multiprocessing.Manager().dict()
-    for key, value in cutted_dict.items():
-        split_processing(n_jobs, key, value, return_dict)
-        return_dict = dict(return_dict)
-        for thread_key in restored_dict.keys():
-            for job in range(n_jobs):
-                for res in return_dict[thread_key + str(job)]:
-                    restored_dict[thread_key].append(res)
-    for idx, restored in enumerate(restored_dict['restored']):
-        G_restored.add_edge(restored[0],restored[1][0], edge_type=restored_dict['edge_type'][idx])
-    return G_restored, pd.DataFrame(restored_dict)
+def run_knn(k, G_restored, row, knn_data, knn_nodes, node_feature='node', embedding_feature='f'):
+    knn = NearestNeighbors(n_neighbors=k, metric='cosine')
+    knn.fit(knn_data)
+    indice = knn.kneighbors(G_restored.nodes[row[node_feature]][embedding_feature].reshape(-1, 512), return_distance=False)
+    return [knn_nodes[0].iloc[indice[0][i]] for i in range(k)]
 
 from annoy import AnnoyIndex
-def restore_hin_annoy(G, cutted_dict, n_jobs=-1, dim=512, k=5, node_feature='node', neighbor_feature='neighbor', node_type_feature='node_type', embedding_feature='f'):
-    def process(start, end, key, value, return_dict, thread_id):
-        global restored_dict
+def run_annoy(k, G_restored, row, knn_data, knn_nodes, node_feature='node', embedding_feature='f', dim=512):
+    knn = AnnoyIndex(dim, 'angular')
+    for knn_index, knn_row in knn_data.iterrows():
+        knn.add_item(knn_index, knn_row)
+    knn.build(k)
+    indice = knn.get_nns_by_vector(G_restored.nodes[row[node_feature]][embedding_feature], k, include_distances=False)
+    return [knn_nodes[0].loc[indice[i]] for i in range(k)]
+
+import multiprocessing
+def restore_hin(G, cutted_dict, nn_method='knn', n_jobs=-1, k=5, node_feature='node', neighbor_feature='neighbor', node_type_feature='node_type', embedding_feature='f'):
+    def process(start, end, G, nearest_neighbor_selector, key, value, return_dict, thread_id):
         value_thread = value.loc[start:(end-1)]
         restored_dict_thread = {'true': [], 'restored': [], 'edge_type': []}
         for index, row in tqdm(value_thread.iterrows(), total=value_thread.shape[0]):
             edge_to_add = key.split('_')
             edge_to_add[0] = row[node_feature]
-            edge_to_add = [row[node_feature] if e == G_restored.nodes[row[node_feature]][node_type_feature] and row[node_feature] != edge_to_add[0] else e for e in edge_to_add]
-            knn_data, knn_nodes = get_knn_data(G_restored, row[node_feature])
-            knn_nodes['type'] = knn_nodes[0].apply(lambda x: G_restored.nodes[x][node_type_feature])
+            edge_to_add = [row[node_feature] if e == G.nodes[row[node_feature]][node_type_feature] and row[node_feature] != edge_to_add[0] else e for e in edge_to_add]
+            knn_data, knn_nodes = get_knn_data(G, row[node_feature])
+            knn_nodes['type'] = knn_nodes[0].apply(lambda x: G.nodes[x][node_type_feature])
             knn_data = knn_data[knn_nodes['type'].isin(edge_to_add)]
             knn_nodes = knn_nodes[knn_nodes['type'].isin(edge_to_add)]
-            knn = AnnoyIndex(dim, 'angular')
-            for knn_index, knn_row in knn_data.iterrows():
-                knn.add_item(knn_index, knn_row)
-            knn.build(k)
-            indice = knn.get_nns_by_vector(G_restored.nodes[row[node_feature]][embedding_feature], k, include_distances=False)
-            edge_to_add[1] = [knn_nodes[0].loc[indice[i]] for i in range(k)]
+            edge_to_add[1] = nearest_neighbor_selector[nn_method](k, G, row, knn_data, knn_nodes)
             restored_dict_thread['true'].append([row[node_feature], row[neighbor_feature]])
             restored_dict_thread['restored'].append(edge_to_add)
             restored_dict_thread['edge_type'].append(key)
@@ -312,8 +238,7 @@ def restore_hin_annoy(G, cutted_dict, n_jobs=-1, dim=512, k=5, node_feature='nod
             _key = key + str(thread_id)
             return_dict[_key] = (restored_dict_thread[key])
     
-    def split_processing(n_jobs, key, value, return_dict):
-        print(value)                                   
+    def split_processing(n_jobs, G, nearest_neighbor_selector, key, value, return_dict):
         split_size = round(len(value) / n_jobs)
         threads = []                                                                
         for i in range(n_jobs):                                                 
@@ -323,7 +248,7 @@ def restore_hin_annoy(G, cutted_dict, n_jobs=-1, dim=512, k=5, node_feature='nod
             end = len(value) if i+1 == n_jobs else (i+1) * split_size                
             # create the thread
             threads.append(                                                         
-                multiprocessing.Process(target=process, args=(start, end, key, value, return_dict, i)))
+                multiprocessing.Process(target=process, args=(start, end, G, nearest_neighbor_selector, key, value, return_dict, i)))
             threads[-1].start() # start the thread we just created                  
 
         # wait for all threads to finish                                            
@@ -332,19 +257,27 @@ def restore_hin_annoy(G, cutted_dict, n_jobs=-1, dim=512, k=5, node_feature='nod
 
     if n_jobs == -1:
         n_jobs = multiprocessing.cpu_count()
-    G_restored = deepcopy(G)
     restored_dict = {'true': [], 'restored': [], 'edge_type': []}
     return_dict = multiprocessing.Manager().dict()
+    nearest_neighbor_selector = {
+        'knn': run_knn,
+        'annoy': run_annoy
+    }
+
     for key, value in cutted_dict.items():
-        split_processing(n_jobs, key, value, return_dict)
+        split_processing(n_jobs, G, nearest_neighbor_selector, key, value, return_dict)
         return_dict = dict(return_dict)
         for thread_key in restored_dict.keys():
             for job in range(n_jobs):
                 for res in return_dict[thread_key + str(job)]:
                     restored_dict[thread_key].append(res)
-    for idx, restored in enumerate(restored_dict['restored']):
-        G_restored.add_edge(restored[0],restored[1][0], edge_type=restored_dict['edge_type'][idx])
-    return G_restored, pd.DataFrame(restored_dict)
+    return pd.DataFrame(restored_dict)
+
+def restore_edges(G, restored):
+    G_restored = deepcopy(G)
+    for idx, restored in enumerate(restored.restored.to_list()):
+        G_restored.add_edge(restored[0],restored[1][0], edge_type=restored.edge_type.to_list()[idx])
+    return G_restored
 
 # put embeddings on graph
 def embedding_graph(G, embeddings, embedding_feature='f'):
