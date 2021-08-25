@@ -7,7 +7,7 @@ import pickle5 as pickle
 from scipy.spatial.distance import cosine
 from tqdm import tqdm
 
-from ephin_utils import decode_html_text
+from ephen_utils import decode_html_text
 
 df = pd.read_csv('/media/pauloricardo/basement/projeto/df11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)
 data = pd.read_csv('/media/pauloricardo/basement/projeto/data11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)

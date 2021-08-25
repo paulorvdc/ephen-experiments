@@ -4,9 +4,9 @@ import numpy as np
 from scipy.spatial.distance import cosine
 from copy import deepcopy
 
-from ephin_utils import difference
-from ephin_utils import make_hin
-from ephin_utils import inner_connections
+from ephen_utils import difference
+from ephen_utils import make_hin
+from ephen_utils import inner_connections
 
 data = pd.read_csv('/media/pauloricardo/basement/projeto/data11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)
 df = pd.read_csv('/media/pauloricardo/basement/projeto/df11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)

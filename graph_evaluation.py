@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from ast import literal_eval
 
+from ephen_utils import _map
+
 path = '/media/pauloricardo/basement/projeto/'
 
 targets = [377904, 375777, 380274, 389293, 388224, 397968, 394909, 394491, 402610, 372939, 380994, 377199, 389118]
@@ -9,26 +11,6 @@ algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2
 splits = [0.05, 0.1, 0.15, 0.2]
 types = ['actor', 'event', 'location']
 ap_at = [1, 3, 5]
-
-def _ap(true, list_pred, at):
-    ranking, aps = [], []
-    for i in range(at):
-        ranking.append(i+1)
-    for index_t, t in enumerate(true):
-        hit = False
-        # get the list of predicteds that's on the secon argument
-        for index_lp, lp in enumerate(list_pred[index_t][1]):
-            if index_lp >= at:
-                break
-            if t[1] == lp:
-                aps.append((1/at)*(at/ranking[index_lp]))
-                hit = True
-        if not(hit):
-            aps.append(0)
-    return aps
-
-def _map(true, list_pred, at):
-    return np.mean(_ap(true, list_pred, at))
 
 results_df = {'ap@': [], 'algorithm': [], 'target': [], 'iteration':[], 'split': [], 'type': [], 'value': []}
 for algorithm in algorithms:

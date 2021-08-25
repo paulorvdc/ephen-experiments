@@ -22,12 +22,12 @@ from ge import Node2Vec
 from ge import Struc2Vec
 from ge import LINE
 
-from ephin_utils import disturbed_hin
-from ephin_utils import regularization
-from ephin_utils import restore_hin_parallel
-from ephin_utils import embedding_graph
-from ephin_utils import metapath2vec
-from ephin_utils import gcn
+from ephen_utils import disturbed_hin
+from ephen_utils import regularization
+from ephen_utils import restore_hin_parallel
+from ephen_utils import embedding_graph
+from ephen_utils import metapath2vec
+from ephen_utils import gcn
 
 def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, split, restored_folder_name):
     if algorithm == 'regularization':

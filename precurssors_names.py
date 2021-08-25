@@ -1,6 +1,6 @@
 import pandas as pd
 
-from ephin_utils import decode_html_text
+from ephen_utils import decode_html_text
 
 path = "/media/pauloricardo/basement/projeto/"
 targets = [389118]

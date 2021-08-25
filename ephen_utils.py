@@ -554,3 +554,23 @@ def metapath2vec(graph, dimensions = 512, num_walks = 1, walk_length = 100, cont
 
         return _embeddings
     return get_embeddings(model, graph)
+
+def _ap(true, list_pred, at):
+    ranking, aps = [], []
+    for i in range(at):
+        ranking.append(i+1)
+    for index_t, t in enumerate(true):
+        hit = False
+        # get the list of predicteds that's on the secon argument
+        for index_lp, lp in enumerate(list_pred[index_t][1]):
+            if index_lp >= at:
+                break
+            if t[1] == lp:
+                aps.append((1/at)*(at/ranking[index_lp]))
+                hit = True
+        if not(hit):
+            aps.append(0)
+    return aps
+
+def _map(true, list_pred, at):
+    return np.mean(_ap(true, list_pred, at))
