@@ -32,10 +32,12 @@ for algorithm in algorithms:
                         results_df['value'].append(_map(restored_df.true.to_list(), restored_df.restored.to_list(), at))
                         
 results_df = pd.DataFrame(results_df)
-results_df = results_df.groupby(by=['ap@', 'algorithm', 'target', 'split', 'type'], as_index=False).mean()
-print(results_df)
+results_df_mean = results_df.groupby(by=['ap@', 'algorithm', 'target', 'split', 'type'], as_index=False).mean()
+results_df_var = results_df.groupby(by=['ap@', 'algorithm', 'target', 'split', 'type'], as_index=False).var()
+results_df_mean['variance'] = results_df_var['value']
+print(results_df_mean)
 from datetime import datetime
-results_df.to_csv('{}new_restored_results/results_{}.csv'.format(path, datetime.now()))
+results_df_mean.to_csv('{}new_restored_results/results_{}.csv'.format(path, datetime.now()))
 
 
 """

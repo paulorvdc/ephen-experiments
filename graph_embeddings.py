@@ -23,6 +23,8 @@ from ge import Struc2Vec
 from ge import LINE
 
 from ephen_utils import disturbed_hin
+from ephen_utils import hide_nodes
+from ephen_utils import find_nodes
 from ephen_utils import regularization
 from ephen_utils import restore_hin
 from ephen_utils import embedding_graph
@@ -78,6 +80,38 @@ def run_model(G_disturbed, cutted_dict, algorithm, target, path, iteration, spli
         restored = restore_hin(G_disturbed, cutted_dict)
         restored.to_csv('{}restored_28.07_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, str(target), iteration, split))
 
+def run_dynamic_test(G, target, path, iteration, split, restored_folder_name, edge_type):
+    G_hidden, hidden_dict = hide_nodes(G, random_state=(1 + iteration))
+    G_hidden, cutted_dict = disturbed_hin(G_hidden, split=split, random_state=(1 + iteration), edge_type=edge_type)
+    G_hidden = regularization(G_hidden)
+    G_hidden, hidden_dict = find_nodes(G_hidden, hidden_dict, percentual=0.5)
+    G_hidden = regularization(G_hidden, iterations=5)
+    G_hidden, hidden_dict = find_nodes(G_hidden, hidden_dict, percentual=1.0)
+    G_hidden = regularization(G_hidden, iterations=5)
+    restored = restore_hin(G_hidden, cutted_dict)
+    restored.to_csv('{}restored_teste_dynamic_{}/{}_{}_{}.csv'.format(path, restored_folder_name, str(target), iteration, split))
+
+def full_network_experiments(targets, splits, edge_type, interval, algorithms=None):
+    for target in targets:
+        with open(path + "graphs/graph_" + str(target) + ".gpickle", "rb") as fh:
+            G = pickle.load(fh)
+        for i in range(interval, 10):
+            for split in splits:
+                G_disturbed, cutted_dict = disturbed_hin(G, split=split, random_state=(1 + i), edge_type=edge_type)
+                for algorithm in algorithms:
+                    print('TEST: {}, {}, {}, {}, {}'.format(algorithm, target, i, split, sys.argv[1]))
+                    run_model(G_disturbed, cutted_dict, algorithm, target, path, i, split, sys.argv[1])
+
+
+def dynamic_insert_network_experiments(targets, splits, edge_type, interval):
+    for target in targets:
+        with open(path + "graphs/graph_" + str(target) + ".gpickle", "rb") as fh:
+            G = pickle.load(fh)
+        for i in range(interval, 10):
+            for split in splits:
+                print('TEST: {}, {}, {}, {}'.format(target, i, split, sys.argv[1]))
+                run_dynamic_test(G, target, path, i, split, sys.argv[1], edge_type)
+
 #targets = [377904, 375777, 380274, 389293, 388224, 397968, 394909, 394491, 402610, 372939, 380994, 377199, 389118]
 #edge_type = ['event_location', 'event_person', 'event_org', 'event_event']
 
@@ -88,7 +122,7 @@ path = "/media/pauloricardo/basement/projeto/"
 
 if sys.argv[1] == 'location':
     targets = [377904, 375777, 380274, 389293, 388224, 397968, 394909, 394491, 402610, 372939, 380994, 377199, 389118]
-    algorithms = ['regularization']
+    algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2vec', 'line', 'gcn']
     edge_type = ['event_location']
     splits = [0.05, 0.1, 0.15, 0.2]
     interval = 0
@@ -107,12 +141,10 @@ else:
     splits = [0.05, 0.1, 0.15, 0.2]
     interval = 0
 
-for target in targets:
-    with open(path + "graphs/graph_" + str(target) + ".gpickle", "rb") as fh:
-        G = pickle.load(fh)
-    for i in range(interval, 10):
-        for split in splits:
-            G_disturbed, cutted_dict = disturbed_hin(G, split=split, random_state=(1 + i), edge_type=edge_type)
-            for algorithm in algorithms:
-                print('TEST: {}, {}, {}, {}, {}'.format(algorithm, target, i, split, sys.argv[1]))
-                run_model(G_disturbed, cutted_dict, algorithm, target, path, i, split, sys.argv[1])
+experiment_selection = {
+    'full': full_network_experiments,
+    'dynamic': dynamic_insert_network_experiments
+}
+
+experiment_selection['full'](targets, splits, edge_type, interval, algorithms=algorithms)
+#experiment_selection['dynamic'](targets, splits, edge_type, interval)

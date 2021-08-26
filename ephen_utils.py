@@ -1,3 +1,4 @@
+from networkx.algorithms.assortativity import neighbor_degree
 import pandas as pd
 import networkx as nx
 import numpy as np
@@ -131,15 +132,13 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'eve
         return x
     # prepare data for type counting
     edges = list(G.edges)
-    edge_types = []
-    for node, neighbor in edges:
-        edge_types.append(G[node][neighbor][type_feature])
+    edge_types = [G[edge[0]][edge[1]][type_feature] for edge in edges]
     
     edges = pd.DataFrame(edges)
     edges = edges.rename(columns={0: 'node', 1: 'neighbor'})
     edges['type'] = edge_types
     edges = edges.apply(keep_left, G=G, axis=1)
-    edges_group = edges.groupby(by=['type'], as_index=False).count().reset_index()
+    edges_group = edges.groupby(by=['type'], as_index=False).count().reset_index(drop=True)
 
     # preparar arestas para eliminar
     edges = edges.sample(frac=1, random_state=random_state).reset_index(drop=True)
@@ -150,19 +149,60 @@ def disturbed_hin(G, split=0.1, random_state=None, edge_type=['event_date', 'eve
         if row['type'] in edge_type:
             to_cut[row['type']] = edges[edges['type'] == row['type']].reset_index(drop=True).loc[0:row['to_cut_count']-1]
                     
-    # eliminar arestas, salvar grafo e arestas retiradas para avaliação
     G_disturbed = deepcopy(G)
     for key, tc_df in to_cut.items():
         for index, row in tc_df.iterrows():
             G_disturbed.remove_edge(row['node'],row['neighbor'])
     return G_disturbed, to_cut
 
+def hide_nodes(G, percentual=0.4, random_state=None, node_type=['event'], type_feature='node_type'):
+    nodes = list(G.nodes)
+    node_types = [G.nodes[node][type_feature] for node in nodes]
+    nodes = pd.DataFrame(nodes)
+    nodes = nodes.rename(columns={0: 'node'})
+    nodes['type'] = node_types
+    nodes_group = nodes.groupby(by=['type'], as_index=False).count().reset_index(drop=True)
+
+    nodes = nodes.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    nodes_group = nodes_group.rename(columns={'node': 'count'})
+    nodes_group['to_cut_count'] = nodes_group['count'].apply(lambda x:round(x * percentual))
+    to_hide = {}
+    for index, row in nodes_group.iterrows():
+        if row['type'] in node_type:
+            to_hide[row['type']] = nodes[nodes['type'] == row['type']].reset_index(drop=True).loc[0:row['to_cut_count']-1]
+    
+    G_hidden = deepcopy(G)
+    for key, th_df in to_hide.items():
+        neighbors = []
+        for index, row in th_df.iterrows():
+            event_neighbors = list(G_hidden.neighbors(row['node']))
+            neighbors.append(event_neighbors)
+            for neighbor in event_neighbors:
+                G_hidden.remove_edge(row['node'],neighbor)
+        th_df['neighbors'] = neighbors
+    return G_hidden, to_hide
+
+def find_nodes(G, hidden, percentual=1.0, random_state=None, type_feature='node_type'):
+    G_found = deepcopy(G)
+    for key, th_df in hidden.items():
+        th_df = th_df.sample(frac=1, random_state=random_state).reset_index(drop=True)
+        adding_df = th_df.loc[0:round(th_df.shape[0] * percentual)-1]
+        remaining_df = th_df.loc[round(th_df.shape[0] * percentual):th_df.shape[0]-1]
+        for index, row in adding_df.iterrows():
+            to_add = row.neighbors
+            for add in to_add:
+                edge_type_str = '{}_{}'.format(row['type'], G.nodes[add][type_feature])
+                G_found.add_edge(row['node'], add, edge_type=edge_type_str)
+        hidden[key] = remaining_df
+    return G_found, hidden
+
 def regularization(G, dim=512, embedding_feature: str = 'embedding', iterations=15, mi=0.85):
     nodes = []
     # inicializando vetor f para todos os nodes
     for node in G.nodes():
-        G.nodes[node]['f'] = np.array([0.0]*dim)
-        if embedding_feature in G.nodes[node]:
+        if 'f' not in G.nodes[node]:
+            G.nodes[node]['f'] = np.array([0.0]*dim)
+        elif embedding_feature in G.nodes[node]:
             G.nodes[node]['f'] = G.nodes[node][embedding_feature]*1.0
         nodes.append(node)
     pbar = tqdm(range(0, iterations))
