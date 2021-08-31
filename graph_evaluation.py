@@ -33,7 +33,7 @@ for algorithm in algorithms:
                         
 results_df = pd.DataFrame(results_df)
 results_df_mean = results_df.groupby(by=['ap@', 'algorithm', 'target', 'split', 'type'], as_index=False).mean()
-results_df_var = results_df.groupby(by=['ap@', 'algorithm', 'target', 'split', 'type'], as_index=False).var()
+results_df_var = results_df.groupby(by=['ap@', 'algorithm', 'target', 'split', 'type'], as_index=False).std()
 results_df_mean['variance'] = results_df_var['value']
 print(results_df_mean)
 from datetime import datetime
