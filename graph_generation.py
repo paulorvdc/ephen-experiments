@@ -8,19 +8,19 @@ from ephen_utils import difference
 from ephen_utils import make_hin
 from ephen_utils import inner_connections
 
-data = pd.read_csv('/media/pauloricardo/basement/projeto/data11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)
-df = pd.read_csv('/media/pauloricardo/basement/projeto/df11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)
-stats = pd.read_csv('/media/pauloricardo/basement/projeto/stats_filtered11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)
+df = pd.concat([pd.read_parquet('/media/pauloricardo/basement/projeto/df01-10_1.parquet'), pd.read_parquet('/media/pauloricardo/basement/projeto/df01-10_2.parquet')])
+
+stats = pd.read_csv('/media/pauloricardo/basement/projeto/stats_filtered01-10.csv').drop(columns='Unnamed: 0').reset_index(drop=True)
 
 df['date_str'] = df['DATE']
 df['DATE'] = pd.to_datetime(df['DATE'], format='%Y-%m-%d')
    
 for index, row in stats.iterrows():
     y = df['DATE'].apply(difference, end=df['DATE'].iloc[row['target']], interval='week')
-    X = data[y > 0]
+    X = df[y > 0].embedding
     filtered_df = df[y > 0]
     y = y[y > 0]
-    filtered_df['dis_cos'] = data.apply(cosine, axis=1, v=data.iloc[row['target']])
+    filtered_df['dis_cos'] = df.embedding.apply(cosine, v=df.embedding.iloc[row['target']])
     X = X[filtered_df['dis_cos'] <= 0.5]
     y = y[filtered_df['dis_cos'] <= 0.5]
     filtered_df = filtered_df[filtered_df['dis_cos'] <= 0.5]

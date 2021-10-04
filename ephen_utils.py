@@ -476,6 +476,16 @@ def gcn(G, target, i, split, label_feature='node_type', label_number='type_code'
 
     return G
 
+def date_string(x):
+    x = str(x)
+    l = []
+    l[:0] = x
+    l.insert(4,'-')
+    l.insert(7,'-')
+    l = l[:10]
+    s = ''
+    return s.join(l)
+
 from bs4 import BeautifulSoup
 def decode_html_text(x):
     x = BeautifulSoup(x, 'html.parser')

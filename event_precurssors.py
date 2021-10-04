@@ -7,10 +7,8 @@ import pickle5 as pickle
 from scipy.spatial.distance import cosine
 from tqdm import tqdm
 
-from ephen_utils import decode_html_text
+df = pd.concat([pd.read_parquet('/media/pauloricardo/basement/projeto/df01-10_1.parquet'), pd.read_parquet('/media/pauloricardo/basement/projeto/df01-10_2.parquet')])
 
-df = pd.read_csv('/media/pauloricardo/basement/projeto/df11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)
-data = pd.read_csv('/media/pauloricardo/basement/projeto/data11-03.csv').drop(columns='Unnamed: 0').reset_index(drop=True)
 targets = [377904, 375777,  380274, 389293, 388224, 397968, 394909, 394491, 372939, 402610, 380994, 377199, 389118]
 path = "/media/pauloricardo/basement/projeto/"
 
@@ -28,7 +26,7 @@ for target in targets:
                     neighbor_split = neighbor.split('-')
                     precursor['week'].append(int(neighbor_split[0]))
                     precursor['year'].append(int(neighbor_split[1]))
-                    precursor['cos'].append(1 - cosine(G.nodes[node]['embedding'], data.iloc[target]))
+                    precursor['cos'].append(1 - cosine(G.nodes[node]['embedding'], df.embedding.iloc[target]))
     precursor = pd.DataFrame(precursor)
     precursor = precursor.sort_values(by=['year', 'week']).reset_index(drop=True)
     precursor.to_csv(path + "/precursors/" + str(target) + ".csv")
@@ -38,7 +36,7 @@ for target in targets:
     plt.figure(target)
     g = sns.lineplot(x="date", y="cos",
              data=precursor)
-    g.set_title("\n".join(wrap('event: ' + decode_html_text(df['text'].iloc[target]) + '. happened at week ' + str(target_date.week) + ' of the year ' + str(target_date.year))), fontsize=18)
+    g.set_title("\n".join(wrap(f'event: {df.text.iloc[target]}. happened at week {str(target_date.week)} of the year {str(target_date.year)}')), fontsize=18)
     g.set_xlabel('week-year', fontsize=14)
     g.set_ylabel('cosine', fontsize=14)
     for item in g.get_xticklabels():
