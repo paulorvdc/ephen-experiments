@@ -1,5 +1,8 @@
 # ephin-experiments
 event prediction experiments with ephin and other information network embedding methods
+experiments run from graphs at `graph_embeddings.py`
+distilbert can be applied on gdelt data with text in at `distilbert_from_gdelt.py`
+graphs can be generated from distibert and gdelt data at `graph_generation.py`
 
 ## GraphEmbeddings
 GraphEmbeddings submodule based on https://github.com/shenweichen/GraphEmbedding but the used algorithms works with tf 2.x
@@ -19,5 +22,4 @@ https://drive.google.com/drive/folders/1_Wz9O4Nzr8JgjzbMzMHI54M3LITG7PCZ?usp=sha
 ### networks like these are required to the experiments, so download them (or create yours) to an accessible directory on your machine and update the path on the code. 
 
 ## wip
-for now: data readings with .parquet and single dataframe for BERT and other atributes for the news.
-as well as other improvements like new experiments, methods, data and usability features with the research progress.
+improvements like new experiments, methods, data and usability features with the research progress.
