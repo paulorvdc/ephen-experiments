@@ -1,8 +1,8 @@
-# ephin-experiments
-event prediction experiments with ephin and other information network embedding methods
+# EMPRESS-experiments
+event network completion experiments with EMPRESS and other information network embedding methods
 experiments run from graphs at `graph_embeddings.py`
 distilbert can be applied on gdelt data with text in at `distilbert_from_gdelt.py`
-graphs can be generated from distibert and gdelt data at `graph_generation.py`
+graphs can be generated from distibert and gdelt data at `empress_utils.py`
 
 ## GraphEmbeddings
 GraphEmbeddings submodule based on https://github.com/shenweichen/GraphEmbedding but the used algorithms works with tf 2.x
