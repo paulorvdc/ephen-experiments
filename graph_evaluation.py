@@ -2,13 +2,14 @@ import pandas as pd
 import numpy as np
 from ast import literal_eval
 
-from ephen_utils import _map
+from ephen_utils import modified_map
+from ephen_utils import map
 
 path = '/media/pauloricardo/basement/projeto/'
 
-targets = [377904, 375777, 380274, 389293, 388224, 397968, 394909, 394491, 402610, 372939, 380994, 377199, 389118]
+targets = [377904, 375777, 380274, 389293, 388224, 397968, 394909, 394491, 402610]
 algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2vec', 'line', 'gcn']
-splits = [0.05, 0.1, 0.15, 0.2]
+splits = [0.2]
 types = ['actor', 'event', 'location']
 ap_at = [1, 3, 5]
 
@@ -29,7 +30,8 @@ for algorithm in algorithms:
                         results_df['iteration'].append(iteration)
                         results_df['split'].append(split)
                         results_df['type'].append(_type)
-                        results_df['value'].append(_map(restored_df.true.to_list(), restored_df.restored.to_list(), at))
+                        results_df['value'].append(modified_map(restored_df.true.to_list(), restored_df.restored.to_list(), at))
+                        #results_df['value'].append(map(restored_df.true.to_list(), restored_df.restored.to_list(), at))
                         
 results_df = pd.DataFrame(results_df)
 results_df_mean = results_df.groupby(by=['ap@', 'algorithm', 'target', 'split', 'type'], as_index=False).mean()

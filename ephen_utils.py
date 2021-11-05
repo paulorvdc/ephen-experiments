@@ -96,6 +96,19 @@ def inner_connections(G, interval='week', embedding_feature='embedding', type_fe
         G.add_edge(new_edge[0],new_edge[1],edge_type=return_type_feature)
     return G
 
+def inner_connections_dateless(G, embedding_feature='embedding', return_type_feature='event_event'):
+    edges_to_add = []
+    for node1 in G.nodes():
+        if embedding_feature in G.nodes[node1]:
+            for node2 in G.nodes():
+                if embedding_feature in G.nodes[node2]:
+                    temp_cosine = cosine(G.nodes[node1][embedding_feature], G.nodes[node2][embedding_feature])
+                    if temp_cosine <= 0.5 and temp_cosine != 0.0:
+                        edges_to_add.append((node1,node2))
+    for new_edge in edges_to_add:
+        G.add_edge(new_edge[0],new_edge[1],edge_type=return_type_feature)
+    return G
+
 def is_equal(x, true_feature='true', restored_feature='restored'):
     if x[true_feature][0] == x[restored_feature][0] and x[true_feature][1] == x[restored_feature][1]:
         return 1
@@ -243,6 +256,8 @@ def get_knn_data(G, node, embedding_feature: str = 'f'):
     return pd.DataFrame(knn_data), pd.DataFrame(knn_nodes)
 
 def run_knn(k, G_restored, row, knn_data, knn_nodes, node_feature='node', embedding_feature='f'):
+    if k == -1:
+        k = knn_data.shape[0]
     knn = NearestNeighbors(n_neighbors=k, metric='cosine')
     knn.fit(knn_data)
     indice = knn.kneighbors(G_restored.nodes[row[node_feature]][embedding_feature].reshape(-1, 512), return_distance=False)
@@ -258,7 +273,7 @@ def run_annoy(k, G_restored, row, knn_data, knn_nodes, node_feature='node', embe
     return [knn_nodes[0].loc[indice[i]] for i in range(k)]
 
 import multiprocessing
-def restore_hin(G, cutted_dict, nn_method='knn', n_jobs=-1, k=5, node_feature='node', neighbor_feature='neighbor', node_type_feature='node_type', embedding_feature='f'):
+def restore_hin(G, cutted_dict, nn_method='knn', n_jobs=-1, k=-1, node_feature='node', neighbor_feature='neighbor', node_type_feature='node_type', embedding_feature='f'):
     def process(start, end, G, nearest_neighbor_selector, key, value, return_dict, thread_id):
         value_thread = value.loc[start:(end-1)]
         restored_dict_thread = {'true': [], 'restored': [], 'edge_type': []}
@@ -538,10 +553,8 @@ def metapath2vec(graph, dimensions = 512, num_walks = 1, walk_length = 100, cont
         return _embeddings
     return get_embeddings(model, graph)
 
-def _ap(true, list_pred, at):
-    ranking, aps = [], []
-    for i in range(at):
-        ranking.append(i+1)
+def ap(true, list_pred, at):
+    ranking, aps = [i+1 for i in range(at)], []
     for index_t, t in enumerate(true):
         hit = False
         # get the list of predicteds that's on the secon argument
@@ -549,11 +562,31 @@ def _ap(true, list_pred, at):
             if index_lp >= at:
                 break
             if t[1] == lp:
-                aps.append((1/at)*(at/ranking[index_lp]))
+                aps.append(1/(at * ranking[index_lp]))
                 hit = True
+                break
         if not(hit):
             aps.append(0)
     return aps
 
-def _map(true, list_pred, at):
-    return np.mean(_ap(true, list_pred, at))
+def map(true, list_pred, at):
+    return np.mean(ap(true, list_pred, at))
+
+def modified_ap(true, list_pred, at):
+    ranking, aps = [i+1 for i in range(at)], []
+    for index_t, t in enumerate(true):
+        hit = False
+        # get the list of predicteds that's on the secon argument
+        for index_lp, lp in enumerate(list_pred[index_t][1]):
+            if index_lp >= at:
+                break
+            if t[1] == lp:
+                aps.append(1/ranking[index_lp])
+                hit = True
+                break
+        if not(hit):
+            aps.append(0)
+    return aps
+
+def modified_map(true, list_pred, at):
+    return np.mean(modified_ap(true, list_pred, at))
