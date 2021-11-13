@@ -9,7 +9,7 @@ path = '/media/pauloricardo/basement/projeto/'
 
 targets = [377904, 375777, 380274, 389293, 388224, 397968, 394909, 394491, 402610]
 algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2vec', 'line', 'gcn']
-splits = [0.2]
+splits = [0.05, 0.1, 0.15, 0.2]
 types = ['actor', 'event', 'location']
 ap_at = [1, 3, 5]
 

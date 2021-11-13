@@ -36,7 +36,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, network_name, path, iteration
     if algorithm == 'regularization':
         G_disturbed = regularization(G_disturbed)
         restored = restore_hin(G_disturbed, cutted_dict)
-        restored.to_csv('{}restored_bench_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
+        restored.to_csv('{}restored_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
     
     elif algorithm == 'deep_walk':
         model_deep_walk = DeepWalk(G_disturbed,walk_length=10,num_walks=80,workers=1)
@@ -44,7 +44,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, network_name, path, iteration
         embeddings_deep_walk = model_deep_walk.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_deep_walk)
         restored = restore_hin(G_disturbed, cutted_dict)    
-        restored.to_csv('{}restored_bench_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
+        restored.to_csv('{}restored_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
     
     elif algorithm == 'node2vec':
         model_node2vec = Node2Vec(G_disturbed, walk_length = 10, num_walks = 80, p = 0.5, q = 1, workers = 1)
@@ -52,7 +52,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, network_name, path, iteration
         embeddings_node2vec = model_node2vec.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_node2vec)
         restored = restore_hin(G_disturbed, cutted_dict)
-        restored.to_csv('{}restored_bench_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
+        restored.to_csv('{}restored_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
     
     elif algorithm == 'struc2vec':
         model_struc2vec = Struc2Vec(G_disturbed, 10, 80, workers=2, verbose=40) #init model
@@ -60,7 +60,7 @@ def run_model(G_disturbed, cutted_dict, algorithm, network_name, path, iteration
         embeddings_struc2vec = model_struc2vec.get_embeddings()# get embedding vectors
         G_disturbed = embedding_graph(G_disturbed, embeddings_struc2vec)
         restored = restore_hin(G_disturbed, cutted_dict)    
-        restored.to_csv('{}restored_bench_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
+        restored.to_csv('{}restored_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
 
     elif algorithm == 'metapath2vec':
         
@@ -86,12 +86,12 @@ def run_model(G_disturbed, cutted_dict, algorithm, network_name, path, iteration
         embeddings_line = model_line.get_embeddings()# get embedding vectors 
         G_disturbed = embedding_graph(G_disturbed, embeddings_line)
         restored = restore_hin(G_disturbed, cutted_dict)    
-        restored.to_csv('{}restored_bench_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
+        restored.to_csv('{}restored_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
     
     elif algorithm == 'gcn':
         G_disturbed = gcn(G_disturbed, network_name, iteration, split)
         restored = restore_hin(G_disturbed, cutted_dict)
-        restored.to_csv('{}restored_bench_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
+        restored.to_csv('{}restored_{}/{}_{}_{}_{}.csv'.format(path, restored_folder_name, algorithm, network_name, iteration, split))
 
 def run_dynamic_test(G, target, path, iteration, split, restored_folder_name, edge_type):
     G_hidden, hidden_dict = hide_nodes(G, random_state=(1 + iteration))
@@ -113,7 +113,10 @@ def full_network_experiments(targets, splits, edge_type, interval, algorithms=No
                 G_disturbed, cutted_dict = disturbed_hin(G, split=split, random_state=(1 + i), edge_type=edge_type)
                 for algorithm in algorithms:
                     print('TEST: {}, {}, {}, {}, {}'.format(algorithm, target, i, split, sys.argv[1]))
+                    start_time = time.time()
                     run_model(G_disturbed, cutted_dict, algorithm, target, path, i, split, sys.argv[1])
+                    with open(f"{path}benchmark_graphs/execution_time.txt", 'a') as f:
+                        f.write(f'Execution time for algorithm {algorithm}, in target {target} on scenario {sys.argv[1]}: {(time.time() - start_time)}.\n')
 
 def dynamic_insert_network_experiments(targets, splits, edge_type, interval):
     for target in targets:
@@ -149,23 +152,23 @@ path = "/media/pauloricardo/basement/projeto/"
 
 if sys.argv[1] == 'location':
     targets = [375777, 388224]
-    algorithms = ['metapath2vec']
+    algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2vec', 'line', 'gcn']
     edge_type = ['event_location']
-    splits = [0.2]
+    splits = [0.05, 0.1, 0.15, 0.2]
     interval = 0
 
 elif sys.argv[1] == 'actor':
     targets = [375777, 388224]
-    algorithms = ['metapath2vec']
+    algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2vec', 'line', 'gcn']
     edge_type = ['event_person', 'event_org']
-    splits = [0.2]
+    splits = [0.05, 0.1, 0.15, 0.2]
     interval = 0
 
 elif sys.argv[1] == 'event':
     targets = [375777, 388224]
-    algorithms = ['metapath2vec']
+    algorithms = ['regularization', 'deep_walk', 'node2vec', 'struc2vec', 'metapath2vec', 'line', 'gcn']
     edge_type = ['event_event']
-    splits = [0.2]
+    splits = [0.05, 0.1, 0.15, 0.2]
     interval = 0
 
 elif sys.argv[1] == 'where':
