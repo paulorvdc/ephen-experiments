@@ -35,8 +35,8 @@ for algorithm in algorithms:
                         
 results_df = pd.DataFrame(results_df)
 results_df_mean = results_df.groupby(by=['ap@', 'algorithm', 'target', 'split', 'type'], as_index=False).mean()
-results_df_var = results_df.groupby(by=['ap@', 'algorithm', 'target', 'split', 'type'], as_index=False).std()
-results_df_mean['variance'] = results_df_var['value']
+results_df_std = results_df.groupby(by=['ap@', 'algorithm', 'target', 'split', 'type'], as_index=False).std()
+results_df_mean['std'] = results_df_std['value']
 print(results_df_mean)
 from datetime import datetime
 results_df_mean.to_csv('{}new_restored_results/results_{}.csv'.format(path, datetime.now()))
