@@ -21,5 +21,5 @@ https://drive.google.com/drive/folders/1_Wz9O4Nzr8JgjzbMzMHI54M3LITG7PCZ?usp=sha
 
 ### networks like these are required to the experiments, so download them (or create yours) to an accessible directory on your machine and update the path on the code. 
 
-## wip
-improvements like new experiments, methods, data and usability features with the research progress.
+## other results
+a compilation of other results from experiments with their respective targets MAP averages and standard deviation can be found at: https://docs.google.com/spreadsheets/d/1ub2Fya25PS0GDY0joM8HOe3vCk7SY7xMgXaaMzPdK6Q/edit?usp=sharing
