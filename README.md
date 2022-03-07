@@ -23,3 +23,17 @@ https://drive.google.com/drive/folders/1_Wz9O4Nzr8JgjzbMzMHI54M3LITG7PCZ?usp=sha
 
 ## other results
 a compilation of other results from experiments with their respective targets MAP averages and standard deviation can be found at: https://docs.google.com/spreadsheets/d/1ub2Fya25PS0GDY0joM8HOe3vCk7SY7xMgXaaMzPdK6Q/edit?usp=sharing
+
+## how to cite
+```
+@INPROCEEDINGS{9671645,  
+  author={do Carmo, Paulo and Marcacini, Ricardo},  
+  booktitle={2021 IEEE International Conference on Big Data (Big Data)},   
+  title={Embedding propagation over heterogeneous event networks for link prediction},   
+  year={2021},  
+  volume={}, 
+  number={},  
+  pages={4812-4821},  
+  doi={10.1109/BigData52589.2021.9671645}
+}
+```
